@@ -1,8 +1,10 @@
 import io
 import unittest
 import xml.etree.ElementTree as ET
+from unittest.mock import Mock, patch
 from PIL import Image, ImageDraw
 from app import app, trace_lock
+import launcher
 
 
 class VectorStudioTests(unittest.TestCase):
@@ -56,6 +58,18 @@ class VectorStudioTests(unittest.TestCase):
         response = self.client.post('/api/vectorize', data={
             'image': (io.BytesIO(b'x' * (12 * 1024 * 1024)), 'large.png')})
         self.assertEqual(response.status_code, 413)
+
+    def test_desktop_launcher_uses_free_local_port_and_closes(self):
+        server = Mock(server_port=54321)
+        server.serve_forever.side_effect = KeyboardInterrupt
+        with patch.object(launcher, 'make_server', return_value=server) as make_server, \
+                patch.object(launcher.threading, 'Timer') as timer:
+            launcher.main()
+        make_server.assert_called_once_with('127.0.0.1', 0, app, threaded=True)
+        self.assertEqual(timer.call_args.kwargs['args'], ('http://127.0.0.1:54321',))
+        timer.return_value.start.assert_called_once()
+        timer.return_value.cancel.assert_called_once()
+        server.server_close.assert_called_once()
 
 
 if __name__ == '__main__':
