@@ -2,6 +2,8 @@
 
 A local Flask + VTracer image-to-SVG app. All frontend assets are local; there are no paid APIs, accounts, external fonts, or runtime network calls. After installing dependencies, it works offline.
 
+**Built and tested with 64-bit Python 3.12.** Python 3.11 is also accepted by the installer. Newer Python versions are not selected for this app because the pinned VTracer native package requires a compatible wheel. You can keep your newer Python and install 3.12 alongside it; Vector Studio uses its own environment. See [Python version guidance](INSTALL.md#python-312-is-the-recommended-version).
+
 ## Windows installer (recommended)
 
 **[Full Windows installation guide → INSTALL.md](INSTALL.md)** — download, setup, desktop shortcut, updates, repair, uninstall, and troubleshooting.
@@ -30,7 +32,15 @@ The manual setup instructions below remain available for developers and macOS/Li
 
 ## 1. Install Python
 
-Use Python 3.11 or 3.12 (64-bit), with pip. These versions are recommended for compatibility with VTracer's prebuilt native package. On Windows, enable “Add Python to PATH” during installation.
+Use **Python 3.12 (64-bit)** with pip to match the tested setup. Python 3.11 is also accepted by the installer. Keep any newer Python installation; install 3.12 alongside it if needed. On Windows, adding Python to PATH is optional for the installer, which also discovers standard installation locations.
+
+For manual setup when multiple versions are installed, select 3.12 explicitly on Windows:
+
+```powershell
+py -3.12 -m venv .venv
+```
+
+On macOS/Linux, use `python3.12 -m venv .venv` when that interpreter is available. The generic `python` command below is suitable only if it resolves to a compatible version.
 
 ## 2. Open a terminal in this folder
 
