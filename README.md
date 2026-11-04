@@ -1,5 +1,7 @@
 # Vector Studio
 
+**Remembered upload folder:** on browsers supporting `showOpenFilePicker` (such as desktop Chrome/Edge), the image chooser uses a consistent picker ID so the browser can reopen the last selected directory. The Cutting Lab shortcut now prefers **http://127.0.0.1:5179**, separate from the original app on port 5178. Browser privacy settings, private browsing, or clearing site data can reset folder history. Unsupported browsers use the ordinary file chooser and its own folder-history behavior. Drag and drop is unchanged. See [Chrome's picker documentation](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access#specifying_a_suggested_directory_and_filename).
+
 **Appearance:** choose **System**, **Light**, or **Dark** from the header. System is the default and follows your Windows/browser preference live. Each app remembers its own choice in a local preference cookie, including when its launch port changes. Image and SVG colors are unchanged; the preview uses a pale checkerboard to keep black cutting artwork visible.
 
 ## Cutting Lab — experimental branch
@@ -31,7 +33,7 @@ Transparency off intentionally adds/keeps a background shape that may itself cut
 
 ### Validation
 
-Ten backend tests cover real VTracer conversion, compound-path holes in binary and color modes, transparent inputs, physical sizing, optional backing, preview separation, invalid settings, upload limits, and launcher behavior. No new dependencies were added.
+Eleven backend tests cover real VTracer conversion, compound-path holes in binary and color modes, transparent inputs, physical sizing, optional backing, preview separation, invalid settings, upload limits, and launcher behavior. No new dependencies were added.
 
 A local Flask + VTracer image-to-SVG app. All frontend assets are local; there are no paid APIs, accounts, external fonts, or runtime network calls. After installing dependencies, it works offline.
 
@@ -47,7 +49,7 @@ On GitHub, click **Code → Download ZIP** to get all installer and app files to
 2. Double-click `Install.cmd`. Do not run it from inside the ZIP.
 3. Setup checks for 64-bit Python 3.11/3.12. If missing, it asks before installing Python 3.12 with Windows Package Manager. Review any installer or agreement prompts yourself. If Windows Package Manager is unavailable, setup explains how to install Python manually.
 4. Confirm the app setup and dependency download. Setup copies the app to `%LOCALAPPDATA%\VectorStudioCuttingLab`, creates its own Python environment, installs the packages, runs the checks, and creates a **Vector Studio Cutting Lab** desktop shortcut.
-5. Double-click the Cutting Lab shortcut. It starts the local app and opens your default browser on a free local port. Keep the console window open; close it or press Ctrl+C to stop the server. Each launch starts a separate instance.
+5. Double-click the Cutting Lab shortcut. It starts the local app and opens your default browser, normally on port 5179. Keep the console window open; close it or press Ctrl+C to stop the server. Each launch starts a separate instance.
 
 No Git, Node.js, Rust, paid API, or administrator account is needed for the normal per-user installation. Internet access is required for initial downloads. The batch files use a process-only PowerShell execution policy option; they do not change your saved Windows policy. Organization policies may still prevent scripts or installations.
 
