@@ -2,6 +2,8 @@
 
 [Back to README](README.md)
 
+**Identify this version:** the original Vector Studio has a **green vector-node icon** in the browser, app header, and desktop shortcut. Cutting Lab uses an **amber scissors icon**. To get the new icons on an existing installation, download a fresh ZIP from this version's branch, extract it, close the app, and rerun `Install.cmd`. Setup copies the icon files and refreshes the desktop shortcut. Restart the app/browser tab afterward; Windows may take a moment to refresh its icon cache.
+
 ## Requirements
 
 Use 64-bit Windows 10 or Windows 11 and an internet connection for initial setup. Python 3.11 or 3.12 is required; setup checks for it and asks before installing Python 3.12 if missing. No Git, Node.js, Rust, paid API, or administrator account is needed for the normal per-user installation.
