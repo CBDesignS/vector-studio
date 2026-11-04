@@ -1,7 +1,7 @@
 # Per-user setup. No administrator rights or permanent policy changes required.
 [CmdletBinding()]
 param(
-    [string]$InstallDirectory = (Join-Path $env:LOCALAPPDATA 'VectorStudio'),
+    [string]$InstallDirectory = (Join-Path $env:LOCALAPPDATA 'VectorStudioCuttingLab'),
     [switch]$CheckOnly
 )
 $ErrorActionPreference = 'Stop'
@@ -62,10 +62,10 @@ function Test-AppDependencies([string]$Executable) {
 }
 
 try {
-    Write-Host "`nVector Studio - Windows Setup`n" -ForegroundColor Green
+    Write-Host "`nVector Studio Cutting Lab - Experimental Windows Setup`n" -ForegroundColor Green
     if (-not [Environment]::Is64BitOperatingSystem) { throw 'This setup requires 64-bit Windows 10 or Windows 11.' }
     $sourceDirectory = Split-Path -Parent $PSScriptRoot
-    foreach ($required in @('app.py','launcher.py','Run.cmd','requirements.txt','templates\index.html','static\app.js','static\style.css')) {
+    foreach ($required in @('app.py','launcher.py','Run.cmd','requirements.txt','templates\index.html','static\app.js','static\style.css','static\cutting.css')) {
         if (-not (Test-Path -LiteralPath (Join-Path $sourceDirectory $required))) {
             throw "Missing $required. Extract the entire ZIP before running Install.cmd."
         }
@@ -108,7 +108,7 @@ try {
     # Explicit allowlist avoids copying uploads, caches, or the development environment.
     $files = @('app.py','launcher.py','Run.cmd','Install.cmd','README.md','INSTALL.md','requirements.txt',
                '.gitignore','windows\Install.ps1','templates\index.html',
-               'static\app.js','static\style.css','tests\test_app.py')
+               'static\app.js','static\style.css','static\cutting.css','tests\test_app.py')
     foreach ($relative in $files) {
         $from = Join-Path $sourceDirectory $relative
         $to = Join-Path $destination $relative
@@ -136,14 +136,14 @@ try {
     $desktop = [Environment]::GetFolderPath('DesktopDirectory')
     if (-not $desktop) { throw 'Windows could not locate your desktop. You can still start the app with Run.cmd in the install folder.' }
     $shell = New-Object -ComObject WScript.Shell
-    $shortcut = $shell.CreateShortcut((Join-Path $desktop 'Vector Studio.lnk'))
+    $shortcut = $shell.CreateShortcut((Join-Path $desktop 'Vector Studio Cutting Lab.lnk'))
     $shortcut.TargetPath = $env:ComSpec
     $shortcut.Arguments = '/d /c ""' + (Join-Path $destination 'Run.cmd') + '""'
     $shortcut.WorkingDirectory = $destination
-    $shortcut.Description = 'Start Vector Studio and open it in your browser'
+    $shortcut.Description = 'Start the experimental Vector Studio Cutting Lab'
     $shortcut.IconLocation = "$env:SystemRoot\System32\shell32.dll,14"
     $shortcut.Save()
-    Write-Host "`nInstalled successfully. Open Vector Studio from your desktop." -ForegroundColor Green
+    Write-Host "`nInstalled successfully. Open Vector Studio Cutting Lab from your desktop." -ForegroundColor Green
     Write-Host 'Keep its console window open while using the app; close it to stop.'
     Write-Host 'To remove the app: close it, delete the install folder and the desktop shortcut. Python is kept for other apps.'
 } catch {
