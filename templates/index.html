@@ -3,12 +3,15 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Vector Studio · Cutting Lab</title>
+  <link rel="icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/icon.svg') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/app-192.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='cutting.css') }}">
   <script defer src="{{ url_for('static', filename='app.js') }}"></script>
 </head>
 <body>
-  <header><a class="brand" href="/">◈ <span>Vector Studio <small>Cutting Lab</small></span></a><span class="local"><i></i> Experimental v2 · Local only</span></header>
+  <header><a class="brand" href="/"><img src="{{ url_for('static', filename='icons/icon.svg') }}" width="36" height="36" alt=""> <span>Vector Studio <small>Cutting Lab</small></span></a><span class="local"><i></i> Experimental v2 · Local only</span></header>
   <main>
     <div class="intro"><div class="eyebrow">FROM PIXELS TO PAPER, VINYL & MORE.</div><h1>Your next cut.<br><span>Starts with a clean path.</span></h1><p>Prepare artwork for your cutting machine.<br>Transparent SVGs. Real holes. Local tracing.</p></div>
     <div class="workspace">
