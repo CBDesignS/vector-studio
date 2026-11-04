@@ -6,7 +6,7 @@ import warnings
 from pathlib import Path
 from threading import Lock
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 from PIL import Image, ImageOps, UnidentifiedImageError
 import vtracer
 
@@ -29,6 +29,11 @@ def number(name, default, low, high, integer=True):
 @app.get('/')
 def index():
     return render_template('index.html')
+
+
+@app.get('/favicon.ico')
+def favicon():
+    return send_from_directory(Path(app.static_folder) / 'icons', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 @app.errorhandler(413)
