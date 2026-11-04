@@ -2,6 +2,8 @@
 
 [Back to README](README.md)
 
+**Upload-folder memory:** the Cutting Lab shortcut now prefers `http://127.0.0.1:5179`, separately from the original version on port 5178. Supported browsers such as desktop Chrome/Edge can reopen the last selected image directory. The first selection uses the browser's default folder. Keep using the same browser/profile and the printed app address. If port 5179 is occupied, the launcher falls back to a free port and prints a notice; folder memory may differ on that address. Unsupported browsers use their standard file picker. Clearing browser data or using private mode can reset remembered folders. Only the image you select is read; this feature does not scan or upload your directory.
+
 **Identify this version:** Cutting Lab has an **amber scissors icon** in the browser, app header, and desktop shortcut. The original Vector Studio uses a **green vector-node icon**. To update an existing Cutting Lab installation, download a fresh ZIP from `cricut-cutting-v2`, extract it, close the app, and rerun `Install.cmd`. Setup copies the icon files and refreshes its desktop shortcut. Restart the app/browser tab afterward; Windows may take a moment to refresh its icon cache.
 
 ## Testing the Cutting Lab branch
@@ -40,7 +42,7 @@ Setup copies the app into `%LOCALAPPDATA%\VectorStudioCuttingLab`, creates a sep
 
 Double-click **Vector Studio Cutting Lab** on your desktop. A console window starts the server and opens your default browser. Keep the console open while using the app. Close it or press **Ctrl+C** to stop the server.
 
-If the browser does not open automatically, copy the local address printed in the console into your browser. The launcher chooses a free local port, so the address may change on each launch. Each shortcut launch starts a separate instance; close extra console windows if needed.
+If the browser does not open automatically, copy the local address printed in the console into your browser. The launcher prefers port 5179 and falls back to a free port only if it is unavailable. Each shortcut launch starts a separate instance; close extra console windows if needed.
 
 You can also run `%LOCALAPPDATA%\VectorStudioCuttingLab\Run.cmd` directly. The app listens only on this computer and works offline after dependencies are installed. It does not run at Windows sign-in or install a background service.
 
@@ -83,4 +85,4 @@ This is a script-based installer, not a signed `.exe`. The batch file uses a pro
 
 ## Verification status
 
-Ten app tests pass, including real color and black-and-white tracing and the desktop launcher test. PowerShell syntax and read-only component discovery have been checked. A complete first-time Windows installation, Python download, and desktop shortcut creation still need testing on a regular Windows installation.
+Eleven app tests pass, including real color and black-and-white tracing and the desktop launcher test. PowerShell syntax and read-only component discovery have been checked. A complete first-time Windows installation, Python download, and desktop shortcut creation still need testing on a regular Windows installation.
