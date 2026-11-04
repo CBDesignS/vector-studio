@@ -1,6 +1,7 @@
 const $ = id => document.getElementById(id);
-const controls = ['colors', 'smoothing', 'speckle', 'mode'];
-let file = null, sourceUrl = null, svgUrl = null, revision = 0, timer, busy = false;
+const controls = ['colors', 'smoothing', 'speckle', 'mode', 'threshold', 'invert',
+  'transparent', 'trim', 'background', 'tolerance', 'fitting', 'quality', 'upscale', 'width_mm', 'minimum_mm'];
+let file = null, sourceUrl = null, svgUrl = null, outlineUrl = null, guideUrl = null, revision = 0, timer, busy = false;
 const formatBytes = bytes => bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KB`;
 
 function labels() {
@@ -8,6 +9,17 @@ function labels() {
   $('smoothing-value').textContent = `${$('smoothing').value}°`;
   $('speckle-value').textContent = `${$('speckle').value} px`;
   $('colors').disabled = $('mode').value === 'binary';
+  $('binary-controls').hidden = $('mode').value !== 'binary';
+  $('color-controls').hidden = $('mode').value !== 'color';
+  $('threshold-value').textContent = $('threshold').value;
+  $('tolerance-value').textContent = $('tolerance').value;
+  $('smoothing').disabled = $('fitting').value === 'polygon';
+}
+function showPreview() {
+  const mode = $('preview-mode').value;
+  const url = mode === 'outline' ? outlineUrl : mode === 'guide' ? guideUrl : svgUrl;
+  $('result').src = url || svgUrl || '';
+  if (mode === 'guide' && !guideUrl && svgUrl) message('Small-detail guide is available in single-color mode. Showing filled artwork.');
 }
 function invalidate() {
   revision++;
@@ -61,22 +73,25 @@ async function convert() {
   $('convert').disabled = true;
   const form = new FormData();
   form.append('image', selectedFile);
-  controls.forEach(id => form.append(id, $(id).value));
+  controls.forEach(id => form.append(id, $(id).type === 'checkbox' ? ($(id).checked ? '1' : '0') : $(id).value));
   try {
     const response = await fetch('/api/vectorize', {method: 'POST', body: form});
     const data = await response.json();
     if (requestedRevision !== revision) return;
     if (!response.ok) throw new Error(data.error || 'Conversion failed. Try again.');
     if (svgUrl) URL.revokeObjectURL(svgUrl);
+    if (outlineUrl) URL.revokeObjectURL(outlineUrl);
     svgUrl = URL.createObjectURL(new Blob([data.svg], {type: 'image/svg+xml'}));
-    $('result').src = svgUrl; $('result').hidden = false; $('result-empty').hidden = true;
-    $('result-meta').textContent = `${data.width} × ${data.height} · ${formatBytes(data.bytes)}`;
+    outlineUrl = URL.createObjectURL(new Blob([data.outline], {type: 'image/svg+xml'}));
+    guideUrl = data.guide;
+    showPreview(); $('result').hidden = false; $('result-empty').hidden = true;
+    $('result-meta').textContent = `${data.width_mm} × ${data.height_mm} mm · ${data.paths} paths · ${formatBytes(data.bytes)}`;
     $('download').href = svgUrl;
     $('download').download = selectedFile.name.replace(/\.[^.]+$/, '') + '.svg';
     $('download').classList.remove('disabled');
     $('download').setAttribute('aria-disabled', 'false');
     $('status').textContent = 'Your SVG is ready';
-    message(data.resized ? 'Traced at up to 1600 px. Your SVG can scale to any size.' : 'Looking sharp. Download your SVG or keep experimenting.');
+    message(data.notices.length ? data.notices.join(' ') : 'Your SVG is ready. Inspect boundaries, confirm the size in Design Space, then make a test cut.');
   } catch (error) {
     if (requestedRevision === revision) {
       $('status').textContent = 'Try again';
@@ -103,7 +118,16 @@ window.addEventListener('drop', event => event.preventDefault());
 controls.forEach(id => $(id).addEventListener('input', queue));
 $('convert').addEventListener('click', convert);
 $('reset').addEventListener('click', () => {
-  Object.entries({colors: 6, smoothing: 60, speckle: 4, mode: 'color'}).forEach(([id, value]) => $(id).value = value);
+  Object.entries({colors: 6, smoothing: 60, speckle: 0, mode: 'binary', threshold:160,
+    background:'#ffffff', tolerance:20, fitting:'spline', quality:'1600', upscale:'1', width_mm:100, minimum_mm:0.5}).forEach(([id, value]) => $(id).value = value);
+  $('transparent').checked = true; $('trim').checked = true; $('invert').checked = false;
   queue();
+});
+$('preview-mode').addEventListener('change', showPreview);
+$('zoom').addEventListener('change', () => {
+  document.querySelectorAll('.canvas').forEach(canvas => {
+    canvas.style.setProperty('--zoom', $('zoom').value);
+    canvas.classList.toggle('zoomed', $('zoom').value !== '1');
+  });
 });
 labels();
