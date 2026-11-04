@@ -53,7 +53,7 @@ On GitHub, click **Code → Download ZIP** to get all installer and app files to
 
 No Git, Node.js, Rust, paid API, or administrator account is needed for the normal per-user installation. Internet access is required for initial downloads. The batch files use a process-only PowerShell execution policy option; they do not change your saved Windows policy. Organization policies may still prevent scripts or installations.
 
-Rerun the installed `Install.cmd` to check or repair dependencies. To update the app, extract a newer project ZIP and run its `Install.cmd` (close the running app first). Existing app source files are replaced after confirmation; this is not an automatic updater or a rollback installer.
+**Updates and removal (package 2.0.0-preview.2):** close the app, extract a newer ZIP outside the installation folder, and run its `Install.cmd`. Setup detects an existing installation and offers **1: Update/repair**, **2: Clean reinstall**, or **3: Cancel**. Normal updates replace app files in the same `%LOCALAPPDATA%\VectorStudioCuttingLab` folder; they do not create nested version folders. Clean reinstall asks again before deleting that edition's entire folder. The original and Cutting Lab remain separate. See [update instructions](INSTALL.md#update-repair-or-clean-reinstall).
 
 For a read-only component check, open PowerShell in the extracted folder and run:
 
@@ -61,7 +61,7 @@ For a read-only component check, open PowerShell in the extracted folder and run
 powershell.exe -NoProfile -File .\windows\Install.ps1 -CheckOnly
 ```
 
-To uninstall, close the app and remove `%LOCALAPPDATA%\VectorStudioCuttingLab` and the desktop shortcut. Python is left installed because other applications may use it. This is a script-based installer, not a signed `.exe` or an Add/Remove Programs package. Windows may show a downloaded-file warning; follow your normal security policies.
+To uninstall, close the app and run `Uninstall.cmd` from this edition's installation folder or extracted ZIP, or choose its **Uninstall** entry in Windows Start after running the updated installer. Confirm the displayed folder before removal. The app folder, private environment, and matching shortcuts are removed; Python and the other edition are kept. Move personal files out of the app folder first. See [uninstall instructions](INSTALL.md#uninstall). This is a script-based installer, not an Add/Remove Programs package.
 
 The manual setup instructions below remain available for developers and macOS/Linux users.
 
