@@ -65,7 +65,7 @@ try {
     Write-Host "`nVector Studio Cutting Lab - Experimental Windows Setup`n" -ForegroundColor Green
     if (-not [Environment]::Is64BitOperatingSystem) { throw 'This setup requires 64-bit Windows 10 or Windows 11.' }
     $sourceDirectory = Split-Path -Parent $PSScriptRoot
-    foreach ($required in @('app.py','launcher.py','Run.cmd','requirements.txt','templates\index.html','static\app.js','static\style.css','static\cutting.css')) {
+    foreach ($required in @('app.py','launcher.py','Run.cmd','requirements.txt','templates\index.html','static\app.js','static\style.css','static\cutting.css','static\icons\app.ico')) {
         if (-not (Test-Path -LiteralPath (Join-Path $sourceDirectory $required))) {
             throw "Missing $required. Extract the entire ZIP before running Install.cmd."
         }
@@ -108,7 +108,9 @@ try {
     # Explicit allowlist avoids copying uploads, caches, or the development environment.
     $files = @('app.py','launcher.py','Run.cmd','Install.cmd','README.md','INSTALL.md','requirements.txt',
                '.gitignore','windows\Install.ps1','templates\index.html',
-               'static\app.js','static\style.css','static\cutting.css','tests\test_app.py')
+               'static\app.js','static\style.css','static\cutting.css','static\icons\app.ico',
+               'static\icons\favicon.ico','static\icons\icon.svg',
+               'static\icons\app-192.png','static\icons\app-512.png','tests\test_app.py')
     foreach ($relative in $files) {
         $from = Join-Path $sourceDirectory $relative
         $to = Join-Path $destination $relative
@@ -141,7 +143,7 @@ try {
     $shortcut.Arguments = '/d /c ""' + (Join-Path $destination 'Run.cmd') + '""'
     $shortcut.WorkingDirectory = $destination
     $shortcut.Description = 'Start the experimental Vector Studio Cutting Lab'
-    $shortcut.IconLocation = "$env:SystemRoot\System32\shell32.dll,14"
+    $shortcut.IconLocation = (Join-Path $destination 'static\icons\app.ico') + ',0'
     $shortcut.Save()
     Write-Host "`nInstalled successfully. Open Vector Studio Cutting Lab from your desktop." -ForegroundColor Green
     Write-Host 'Keep its console window open while using the app; close it to stop.'
