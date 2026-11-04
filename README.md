@@ -2,6 +2,32 @@
 
 A local Flask + VTracer image-to-SVG app. All frontend assets are local; there are no paid APIs, accounts, external fonts, or runtime network calls. After installing dependencies, it works offline.
 
+## Windows installer (recommended)
+
+**[Full Windows installation guide → INSTALL.md](INSTALL.md)** — download, setup, desktop shortcut, updates, repair, uninstall, and troubleshooting.
+
+On GitHub, click **Code → Download ZIP** to get all installer and app files together.
+
+1. Download the project ZIP and **extract the entire ZIP** into a folder.
+2. Double-click `Install.cmd`. Do not run it from inside the ZIP.
+3. Setup checks for 64-bit Python 3.11/3.12. If missing, it asks before installing Python 3.12 with Windows Package Manager. Review any installer or agreement prompts yourself. If Windows Package Manager is unavailable, setup explains how to install Python manually.
+4. Confirm the app setup and dependency download. Setup copies the app to `%LOCALAPPDATA%\VectorStudio`, creates its own Python environment, installs the packages, runs the checks, and creates a **Vector Studio** desktop shortcut.
+5. Double-click the shortcut. It starts the local app and opens your default browser on a free local port. Keep the console window open; close it or press Ctrl+C to stop the server. Each launch starts a separate instance.
+
+No Git, Node.js, Rust, paid API, or administrator account is needed for the normal per-user installation. Internet access is required for initial downloads. The batch files use a process-only PowerShell execution policy option; they do not change your saved Windows policy. Organization policies may still prevent scripts or installations.
+
+Rerun the installed `Install.cmd` to check or repair dependencies. To update the app, extract a newer project ZIP and run its `Install.cmd` (close the running app first). Existing app source files are replaced after confirmation; this is not an automatic updater or a rollback installer.
+
+For a read-only component check, open PowerShell in the extracted folder and run:
+
+```powershell
+powershell.exe -NoProfile -File .\windows\Install.ps1 -CheckOnly
+```
+
+To uninstall, close the app and remove `%LOCALAPPDATA%\VectorStudio` and the desktop shortcut. Python is left installed because other applications may use it. This is a script-based installer, not a signed `.exe` or an Add/Remove Programs package. Windows may show a downloaded-file warning; follow your normal security policies.
+
+The manual setup instructions below remain available for developers and macOS/Linux users.
+
 ## 1. Install Python
 
 Use Python 3.11 or 3.12 (64-bit), with pip. These versions are recommended for compatibility with VTracer's prebuilt native package. On Windows, enable “Add Python to PATH” during installation.
