@@ -1,5 +1,7 @@
 # Vector Studio
 
+**Appearance:** choose **System**, **Light**, or **Dark** from the header. System is the default and follows your Windows/browser preference live. Each app remembers its own choice in a local preference cookie, including when its launch port changes. Image and SVG colors are unchanged; the preview uses a pale checkerboard to keep black cutting artwork visible.
+
 ## Cutting Lab — experimental branch
 
 This is **cricut-cutting-v2**, an experimental version aimed at SVG artwork for cutting machines. The working `main` branch is unchanged. The Windows installer uses a separate `%LOCALAPPDATA%\VectorStudioCuttingLab` folder and **Vector Studio Cutting Lab** desktop shortcut, so you can test it alongside the original app.
