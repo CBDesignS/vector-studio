@@ -5,6 +5,11 @@ param(
     [switch]$CheckOnly
 )
 $ErrorActionPreference = 'Stop'
+$appId = 'cutting-lab'
+$appFolder = 'VectorStudioCuttingLab'
+$appName = 'Vector Studio Cutting Lab'
+$appVersion = '2.0.0-preview.2'
+. (Join-Path $PSScriptRoot 'AppMaintenance.ps1')
 
 function Confirm-Step([string]$Question) {
     return (Read-Host "$Question [y/N]") -match '^(y|yes)$'
@@ -65,13 +70,14 @@ try {
     Write-Host "`nVector Studio Cutting Lab - Experimental Windows Setup`n" -ForegroundColor Green
     if (-not [Environment]::Is64BitOperatingSystem) { throw 'This setup requires 64-bit Windows 10 or Windows 11.' }
     $sourceDirectory = Split-Path -Parent $PSScriptRoot
-    foreach ($required in @('app.py','launcher.py','Run.cmd','requirements.txt','templates\index.html','static\app.js','static\style.css','static\cutting.css','static\icons\app.ico','static\theme.js','static\theme.css')) {
+    foreach ($required in @('Uninstall.cmd','windows\Uninstall.ps1','windows\AppMaintenance.ps1','app.py','launcher.py','Run.cmd','requirements.txt','templates\index.html','static\app.js','static\style.css','static\cutting.css','static\icons\app.ico','static\theme.js','static\theme.css')) {
         if (-not (Test-Path -LiteralPath (Join-Path $sourceDirectory $required))) {
             throw "Missing $required. Extract the entire ZIP before running Install.cmd."
         }
     }
     $python = Find-Python
-    $destination = [IO.Path]::GetFullPath($InstallDirectory)
+    $destination = Get-AppTarget $InstallDirectory $appFolder
+    $installState = Get-AppInstallState $destination $appId
     $venvPython = Join-Path $destination '.venv\Scripts\python.exe'
     Write-Host "Install folder: $destination"
     if ($python) { Write-Host "Compatible Python found: $python" }
@@ -79,8 +85,34 @@ try {
     $dependenciesReady = Test-AppDependencies $venvPython
     Write-Host "App dependencies ready: $dependenciesReady"
     if ($CheckOnly) {
+        Write-Host "Installation: $installState; package version: $appVersion"
         Write-Host 'Check complete. Nothing was installed or changed.'
         return
+    }
+    Assert-NoAppLinks $destination
+    Assert-AppStopped $destination
+    $cleanReinstall = $false
+    if ($installState -in @('Managed','Legacy')) {
+        $previousVersion = 'earlier/unversioned'
+        $recordPath = Join-Path $destination '.vector-studio-install.json'
+        if ($installState -eq 'Managed') { $previousVersion = (Get-Content -LiteralPath $recordPath -Raw | ConvertFrom-Json).version }
+        Write-Host "`nExisting $appName installation: $previousVersion. Package: $appVersion."
+        Write-Host '1 - Update/repair in the SAME folder (keep the private Python environment).'
+        Write-Host '2 - Remove the previous installation and install a clean copy.'
+        Write-Host '3 - Cancel.'
+        $action = Read-Host 'Choose 1, 2, or 3 (Enter = cancel)'
+        if ($action -notin @('1','2')) { throw 'Setup cancelled. No app files were changed.' }
+        $cleanReinstall = $action -eq '2'
+        if ($cleanReinstall) {
+            $sourcePath = [IO.Path]::GetFullPath($sourceDirectory).TrimEnd('\','/')
+            if ($sourcePath.Equals($destination, [StringComparison]::OrdinalIgnoreCase) -or $sourcePath.StartsWith($destination + '\', [StringComparison]::OrdinalIgnoreCase)) {
+                throw 'For a clean reinstall, run Install.cmd from a freshly extracted ZIP OUTSIDE the app installation folder.'
+            }
+            Write-Host "The entire previous app folder $destination will be permanently removed."
+            Write-Host 'Move any personal files saved INSIDE it elsewhere before continuing. Python and files outside it are kept.'
+            if (-not (Confirm-Step 'Remove the previous installation for a clean reinstall?')) { throw 'Clean reinstall cancelled.' }
+            $dependenciesReady = $false
+        }
     }
     if (-not $python) {
         if (-not (Confirm-Step 'Install Python 3.12 from the Python Software Foundation using Windows Package Manager?')) {
@@ -96,7 +128,7 @@ try {
         $python = Find-Python
         if (-not $python) { throw 'Python was not found after installation. Restart this setup, or install Python 3.12 from python.org.' }
     }
-    if (-not (Confirm-Step "Set up Vector Studio in $destination and create a desktop shortcut? Existing app source files there will be updated")) {
+    if (-not (Confirm-Step "Set up $appName in $destination and create a desktop shortcut? Existing app source files there will be updated")) {
         throw 'Setup cancelled. No app files were copied.'
     }
     if (-not $dependenciesReady) {
@@ -104,10 +136,13 @@ try {
             throw 'Dependency installation declined.'
         }
     }
+    if ($cleanReinstall) { Remove-AppFolder $destination $appFolder $appId }
     New-Item -ItemType Directory -Path $destination -Force | Out-Null
+    @{app_id=$appId;version=$appVersion;install_directory=$destination;installed_at=(Get-Date).ToString('o');status='setting-up'} |
+        ConvertTo-Json | Set-Content -LiteralPath (Join-Path $destination '.vector-studio-install.json') -Encoding UTF8
     # Explicit allowlist avoids copying uploads, caches, or the development environment.
-    $files = @('app.py','launcher.py','Run.cmd','Install.cmd','README.md','INSTALL.md','requirements.txt',
-               '.gitignore','windows\Install.ps1','templates\index.html',
+    $files = @('app.py','launcher.py','Run.cmd','Install.cmd','Uninstall.cmd','README.md','INSTALL.md','requirements.txt',
+               '.gitignore','windows\Install.ps1','windows\Uninstall.ps1','windows\AppMaintenance.ps1','templates\index.html',
                'static\app.js','static\style.css','static\cutting.css','static\theme.js','static\theme.css','static\icons\app.ico',
                'static\icons\favicon.ico','static\icons\icon.svg',
                'static\icons\app-192.png','static\icons\app-512.png','tests\test_app.py')
@@ -142,12 +177,31 @@ try {
     $shortcut.TargetPath = $env:ComSpec
     $shortcut.Arguments = '/d /c ""' + (Join-Path $destination 'Run.cmd') + '""'
     $shortcut.WorkingDirectory = $destination
-    $shortcut.Description = 'Start the experimental Vector Studio Cutting Lab'
+    $shortcut.Description = 'Start Vector Studio and open it in your browser'
     $shortcut.IconLocation = (Join-Path $destination 'static\icons\app.ico') + ',0'
     $shortcut.Save()
+    $programs = [Environment]::GetFolderPath('Programs')
+    if ($programs) {
+        $menu = Join-Path $programs $appName
+        New-Item -ItemType Directory -Path $menu -Force | Out-Null
+        $menuShortcut = $shell.CreateShortcut((Join-Path $menu "$appName.lnk"))
+        $menuShortcut.TargetPath = $shortcut.TargetPath
+        $menuShortcut.Arguments = $shortcut.Arguments
+        $menuShortcut.WorkingDirectory = $destination
+        $menuShortcut.IconLocation = $shortcut.IconLocation
+        $menuShortcut.Save()
+        $uninstallShortcut = $shell.CreateShortcut((Join-Path $menu "Uninstall $appName.lnk"))
+        $uninstallShortcut.TargetPath = $env:ComSpec
+        $uninstallShortcut.Arguments = '/d /c ""' + (Join-Path $destination 'Uninstall.cmd') + '""'
+        $uninstallShortcut.WorkingDirectory = $destination
+        $uninstallShortcut.IconLocation = $shortcut.IconLocation
+        $uninstallShortcut.Save()
+    }
+    @{app_id=$appId;version=$appVersion;install_directory=$destination;installed_at=(Get-Date).ToString('o');status='installed'} |
+        ConvertTo-Json | Set-Content -LiteralPath (Join-Path $destination '.vector-studio-install.json') -Encoding UTF8
     Write-Host "`nInstalled successfully. Open Vector Studio Cutting Lab from your desktop." -ForegroundColor Green
     Write-Host 'Keep its console window open while using the app; close it to stop.'
-    Write-Host 'To remove the app: close it, delete the install folder and the desktop shortcut. Python is kept for other apps.'
+    Write-Host "Version $appVersion. To uninstall, use Uninstall.cmd or search Windows Start for Uninstall $appName."
 } catch {
     Write-Host "`nSetup stopped: $($_.Exception.Message)" -ForegroundColor Red
     exit 1
