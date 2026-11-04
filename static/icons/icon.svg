@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <title>Vector Studio</title>
+  <defs><linearGradient id="tile" x2="1" y2="1"><stop stop-color="#316C59"/><stop offset="1" stop-color="#163C32"/></linearGradient></defs>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#tile)"/>
+  <rect x="28" y="28" width="456" height="456" rx="102" fill="none" stroke="#91C5A5" stroke-opacity=".23" stroke-width="3"/>
+  <path d="M118 153 256 356 394 153" fill="none" stroke="#EFF8E8" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M119 153C159 153 191 153 211 186M394 153C354 153 322 153 301 186" fill="none" stroke="#B6D78D" stroke-width="9" stroke-linecap="round"/>
+  <g fill="#B6D78D" stroke="#234F40" stroke-width="7"><rect x="93" y="128" width="50" height="50" rx="7"/><rect x="369" y="128" width="50" height="50" rx="7"/><rect x="231" y="331" width="50" height="50" rx="7"/></g>
+</svg>
