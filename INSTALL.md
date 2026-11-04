@@ -48,19 +48,29 @@ powershell.exe -NoProfile -File .\windows\Install.ps1 -CheckOnly
 
 This reports the compatible Python installation and whether the app dependencies are ready. It does not install anything, copy files, or create a shortcut. If your Windows policy blocks scripts, follow your organization’s policy or use the [manual setup](README.md#1-install-python).
 
-## Update or repair
+## Update, repair, or clean reinstall
 
-To repair missing dependencies, close the app and rerun `Install.cmd` in `%LOCALAPPDATA%\VectorStudio`.
+This package is **1.2.0**. Each edition uses one fixed folder: `%LOCALAPPDATA%\VectorStudio`. Updates do **not** create nested folders or a separate folder for every version. Original Vector Studio and Cutting Lab use different folders and can stay installed together.
 
-To update the app, download a fresh project ZIP from GitHub, extract it, close the running app, and run the new `Install.cmd`. After confirmation, setup replaces app source files in the installation folder. It checks existing dependencies and installs them if needed. This is a manual update process without automatic rollback.
+Close the app's console window, download the new ZIP from this edition's branch, extract it **outside the installation folder**, and run its `Install.cmd`. When an existing installation is found, setup asks:
+
+1. **Update/repair:** replace app files in the same folder and keep the private Python environment. Dependencies are checked and repaired when needed.
+2. **Clean reinstall:** remove this edition's previous app folder, then install a fresh copy. A second confirmation is required. Move any personal files stored inside the app folder elsewhere first; the entire folder will be deleted.
+3. **Cancel:** leave the installation alone. Pressing Enter also cancels.
+
+Use option 1 for normal updates. To repair the current version, you can run the installed `Install.cmd` and select option 1. Clean reinstall must run from a separate extracted ZIP because setup cannot delete the folder it is running from.
+
+Setup records the installed package version. Older installations are recognized by their app files and private environment and appear as earlier/unversioned. This is a manual update process without automatic rollback; if a clean installation fails after removal, rerun setup to finish installing. Setup manages only this edition's standard folder and refuses unrecognized contents or linked folders. Close all running app instances before updating or removing it.
 
 ## Uninstall
 
-1. Close the Vector Studio console window.
-2. Delete `%LOCALAPPDATA%\VectorStudio`.
-3. Delete the **Vector Studio** desktop shortcut.
+1. Close this edition's console window.
+2. Open **Uninstall** for this edition from its Windows Start folder, or double-click `Uninstall.cmd` in its installation folder. You can also run `Uninstall.cmd` from a newly extracted ZIP of the **same edition**, including to remove an older installation.
+3. Check the folder displayed and type **y** to confirm. Enter or **n** cancels.
 
-Python is left installed because other applications may use it. The app is not registered in Windows Add/Remove Programs.
+The script removes `%LOCALAPPDATA%\VectorStudio`, including its private Python environment and **any personal files saved inside it**, plus matching desktop and Start menu shortcuts. It keeps your installed Python, the other edition, downloaded source ZIPs, browser preferences, and files outside the app folder. No administrator account is needed for normal per-user removal.
+
+Start menu entries are created when you run this updated installer. The app is not registered in Windows Add/Remove Programs. Custom/manual installations outside the standard folder must be removed manually; the script deliberately refuses to delete arbitrary locations.
 
 ## Troubleshooting
 
@@ -77,4 +87,4 @@ This is a script-based installer, not a signed `.exe`. The batch file uses a pro
 
 ## Verification status
 
-Seven app tests pass, including real color and black-and-white tracing and the desktop launcher test. PowerShell syntax and read-only component discovery have been checked. A complete first-time Windows installation, Python download, and desktop shortcut creation still need testing on a regular Windows installation.
+Seven app tests pass, including real color and black-and-white tracing and the desktop launcher test. PowerShell syntax, read-only component discovery, and removal safeguards have been checked. Uninstall self-removal was exercised in a disposable workspace folder with shortcut removal mocked; real desktop/Start shortcut removal and junction handling still need a normal Windows test. A complete first-time Windows installation, Python download, and desktop shortcut creation still need testing on a regular Windows installation.
