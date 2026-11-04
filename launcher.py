@@ -1,13 +1,14 @@
 """Desktop entry point: prefer a stable local address for browser preferences."""
 import threading
 import webbrowser
+from pathlib import Path
 
 from werkzeug.serving import make_server
 from app import app
 PREFERRED_PORT = 5178
 
 
-def main():
+def run_server():
     try:
         server = make_server('127.0.0.1', PREFERRED_PORT, app, threaded=True)
     except SystemExit as exc:
@@ -30,6 +31,12 @@ def main():
     finally:
         opener.cancel()
         server.server_close()
+
+
+def main():
+    # Keep this handle open so Windows setup/uninstall can detect a live app.
+    with Path(__file__).with_name('.vector-studio-running.lock').open('ab'):
+        run_server()
 
 
 if __name__ == '__main__':
