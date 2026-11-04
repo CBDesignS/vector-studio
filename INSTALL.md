@@ -2,6 +2,8 @@
 
 [Back to README](README.md)
 
+**Identify this version:** Cutting Lab has an **amber scissors icon** in the browser, app header, and desktop shortcut. The original Vector Studio uses a **green vector-node icon**. To update an existing Cutting Lab installation, download a fresh ZIP from `cricut-cutting-v2`, extract it, close the app, and rerun `Install.cmd`. Setup copies the icon files and refreshes its desktop shortcut. Restart the app/browser tab afterward; Windows may take a moment to refresh its icon cache.
+
 ## Testing the Cutting Lab branch
 
 Download this experimental version from [cricut-cutting-v2](https://github.com/CBDesignS/vector-studio/tree/cricut-cutting-v2), then choose **Code → Download ZIP**. Run `Install.cmd` from the extracted folder. It installs separately as **Vector Studio Cutting Lab**, leaving your original Vector Studio installation and shortcut in place.
