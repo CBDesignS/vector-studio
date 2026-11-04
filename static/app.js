@@ -103,8 +103,36 @@ async function convert() {
   }
 }
 $('file').addEventListener('change', event => choose(event.target.files[0]));
+let pickerOpen = false;
+async function openImagePicker() {
+  if (pickerOpen) return;
+  if (!window.showOpenFilePicker) { $('file').click(); return; }
+  pickerOpen = true;
+  try {
+    const [handle] = await window.showOpenFilePicker({
+      id: `${document.documentElement.dataset.app}-images`,
+      multiple: false,
+      excludeAcceptAllOption: true,
+      types: [{description: 'Images', accept: {
+        'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'],
+        'image/webp': ['.webp'], 'image/bmp': ['.bmp'],
+      }}],
+    });
+    if (handle) choose(await handle.getFile());
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      // Embedded browsers and restrictive policies can reject the enhanced picker.
+      $('file').click();
+    }
+  } finally { pickerOpen = false; }
+}
+$('dropzone').addEventListener('click', event => {
+  if (event.target === $('file')) return;
+  event.preventDefault();
+  openImagePicker();
+});
 $('dropzone').addEventListener('keydown', event => {
-  if (event.key === 'Enter' || event.key === ' ') {event.preventDefault(); $('file').click();}
+  if (event.key === 'Enter' || event.key === ' ') {event.preventDefault(); openImagePicker();}
 });
 ['dragenter', 'dragover'].forEach(type => $('dropzone').addEventListener(type, event => {
   event.preventDefault(); $('dropzone').classList.add('dragging');
