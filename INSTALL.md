@@ -6,6 +6,14 @@
 
 Use 64-bit Windows 10 or Windows 11 and an internet connection for initial setup. Python 3.11 or 3.12 is required; setup checks for it and asks before installing Python 3.12 if missing. No Git, Node.js, Rust, paid API, or administrator account is needed for the normal per-user installation.
 
+### Python 3.12 is the recommended version
+
+This app was built and tested with **64-bit Python 3.12**. The installer also accepts Python 3.11. It deliberately does not select newer versions because the pinned VTracer 0.6.15 native package needs a compatible prebuilt wheel; a newer Python installation alone does not satisfy this app's setup requirements.
+
+**Already have a newer Python installed? Keep it.** Accept the installer's offer to install Python 3.12 alongside it. Setup uses a compatible interpreter to create Vector Studio's separate `.venv` environment. It does not uninstall your existing Python or intentionally change your system's default Python version. If compatible Python 3.11 is already present, setup may use it rather than installing 3.12.
+
+If installing Python manually, choose **64-bit Python 3.12**, include pip, and rerun `Install.cmd`.
+
 ## Download and install
 
 1. Sign in to GitHub and open [CBDesignS/vector-studio](https://github.com/CBDesignS/vector-studio).
