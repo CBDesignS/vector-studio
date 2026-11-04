@@ -1,5 +1,36 @@
 # Vector Studio
 
+## Cutting Lab — experimental branch
+
+This is **cricut-cutting-v2**, an experimental version aimed at SVG artwork for cutting machines. The working `main` branch is unchanged. The Windows installer uses a separate `%LOCALAPPDATA%\VectorStudioCuttingLab` folder and **Vector Studio Cutting Lab** desktop shortcut, so you can test it alongside the original app.
+
+Open [this branch](https://github.com/CBDesignS/vector-studio/tree/cricut-cutting-v2), choose **Code → Download ZIP**, extract the whole ZIP, and run **Install.cmd**. See [INSTALL.md](INSTALL.md).
+
+### What changed
+
+- **Transparency on by default**, with a checkbox to keep a background instead.
+- **Single-color cut mode** defaults to keeping small details. Threshold and inversion controls let you choose dark or light artwork.
+- **Real holes in filled paths**, rather than white overlays. Color mode uses cutout geometry and removes the selected background color throughout the artwork; pick the color and adjust tolerance. It is color-key removal, not automatic subject recognition.
+- **Trim empty margins** and set the exported SVG width in **millimetres**. Height is proportional. With trim off, width includes the canvas margins. Confirm imported size in Design Space.
+- **Filled / cut boundaries / small-detail guide** views and zoom. These are previews; the download always contains filled artwork, never the preview strokes or guide marks.
+- **Small-detail guide** highlights estimated thin foreground areas and narrow gaps in red at the requested physical size. It uses raster morphology, so corners may be marked and details may be missed. It is not an exact cutter simulation. Material, blade, and weeding technique still matter.
+- Choose **smooth curves or straight segments**, **1600/3200 px** processing, and optional **2×/4× interpolation** for tiny source images. Interpolation cannot reconstruct missing artwork. Higher quality can take longer and use more memory.
+
+For the football trophy, start with single-color mode, transparency on, speckles at 0, and try threshold and 4× detail boost. Automatic tracing still cannot reliably redraw individual laces or force a stand into ideal geometry. A node editor and automatic geometry reconstruction are not included in this experiment.
+
+### Cutting workflow
+
+1. Upload artwork and inspect the filled SVG against the original.
+2. Adjust threshold, smoothing, and speckle filtering; choose the intended width.
+3. Inspect **Cut boundaries** for unwanted islands and holes. Try **Small-detail guide** in single-color mode; red marks are advisory.
+4. Download and import the SVG into Cricut Design Space. Verify the dimensions, layer count, and cut preview before a small test cut. This branch has not yet been verified on a physical Cricut.
+
+Transparency off intentionally adds/keeps a background shape that may itself cut. Color layers can have coincident boundaries; inspect layer behavior in Design Space. Existing transparency is composited onto the selected background color before tracing; with transparency enabled, that color is then removed. Color-key removal also removes intentional artwork of that same color.
+
+### Validation
+
+Ten backend tests cover real VTracer conversion, compound-path holes in binary and color modes, transparent inputs, physical sizing, optional backing, preview separation, invalid settings, upload limits, and launcher behavior. No new dependencies were added.
+
 A local Flask + VTracer image-to-SVG app. All frontend assets are local; there are no paid APIs, accounts, external fonts, or runtime network calls. After installing dependencies, it works offline.
 
 **Built and tested with 64-bit Python 3.12.** Python 3.11 is also accepted by the installer. Newer Python versions are not selected for this app because the pinned VTracer native package requires a compatible wheel. You can keep your newer Python and install 3.12 alongside it; Vector Studio uses its own environment. See [Python version guidance](INSTALL.md#python-312-is-the-recommended-version).
@@ -13,8 +44,8 @@ On GitHub, click **Code → Download ZIP** to get all installer and app files to
 1. Download the project ZIP and **extract the entire ZIP** into a folder.
 2. Double-click `Install.cmd`. Do not run it from inside the ZIP.
 3. Setup checks for 64-bit Python 3.11/3.12. If missing, it asks before installing Python 3.12 with Windows Package Manager. Review any installer or agreement prompts yourself. If Windows Package Manager is unavailable, setup explains how to install Python manually.
-4. Confirm the app setup and dependency download. Setup copies the app to `%LOCALAPPDATA%\VectorStudio`, creates its own Python environment, installs the packages, runs the checks, and creates a **Vector Studio** desktop shortcut.
-5. Double-click the shortcut. It starts the local app and opens your default browser on a free local port. Keep the console window open; close it or press Ctrl+C to stop the server. Each launch starts a separate instance.
+4. Confirm the app setup and dependency download. Setup copies the app to `%LOCALAPPDATA%\VectorStudioCuttingLab`, creates its own Python environment, installs the packages, runs the checks, and creates a **Vector Studio Cutting Lab** desktop shortcut.
+5. Double-click the Cutting Lab shortcut. It starts the local app and opens your default browser on a free local port. Keep the console window open; close it or press Ctrl+C to stop the server. Each launch starts a separate instance.
 
 No Git, Node.js, Rust, paid API, or administrator account is needed for the normal per-user installation. Internet access is required for initial downloads. The batch files use a process-only PowerShell execution policy option; they do not change your saved Windows policy. Organization policies may still prevent scripts or installations.
 
@@ -26,7 +57,7 @@ For a read-only component check, open PowerShell in the extracted folder and run
 powershell.exe -NoProfile -File .\windows\Install.ps1 -CheckOnly
 ```
 
-To uninstall, close the app and remove `%LOCALAPPDATA%\VectorStudio` and the desktop shortcut. Python is left installed because other applications may use it. This is a script-based installer, not a signed `.exe` or an Add/Remove Programs package. Windows may show a downloaded-file warning; follow your normal security policies.
+To uninstall, close the app and remove `%LOCALAPPDATA%\VectorStudioCuttingLab` and the desktop shortcut. Python is left installed because other applications may use it. This is a script-based installer, not a signed `.exe` or an Add/Remove Programs package. Windows may show a downloaded-file warning; follow your normal security policies.
 
 The manual setup instructions below remain available for developers and macOS/Linux users.
 
@@ -98,7 +129,7 @@ Open **http://127.0.0.1:5000** in your browser. Keep the terminal open; press Ct
 | Remove speckles | `filter_speckle`, 0–64 | Discards small patches; higher values remove more fine details. |
 | Trace mode | `colormode` | Color or binary black-and-white tracing. |
 
-Logos, icons, and flat illustrations generally trace more cleanly than photographs. Transparent PNG input is preserved when normalizing to RGBA; edge appearance depends on the source and VTracer's tracing. SVGs are displayed through image elements, not injected as page markup.
+Logos, icons, and flat illustrations generally trace more cleanly than photographs. Transparent pixels are excluded in single-color mode; color mode uses the selected background key as described above. SVGs are displayed through image elements, not injected as page markup.
 
 ## How the code fits together
 
@@ -107,7 +138,7 @@ Logos, icons, and flat illustrations generally trace more cleanly than photograp
 3. `static/app.js`: file selection, preview object URLs, debounced updates, serialized requests, stale-result protection, and SVG download.
 4. `app.py`: validates image data and settings, applies EXIF orientation, normalizes to PNG, calls VTracer, and returns SVG JSON. Each conversion uses temporary files that are removed afterward.
 
-Uploads are limited to 12 MB and 20 million decoded pixels. Images larger than 1600 px on either side are proportionally reduced before tracing. One conversion runs at a time; additional clients receive a retry message. There is no persistent image storage. A complex trace can take time; there is no hard execution timeout on native tracing.
+Uploads are limited to 12 MB and 20 million decoded pixels. Images larger than the selected 1600/3200 px limit are proportionally reduced before tracing. One conversion runs at a time; additional clients receive a retry message. There is no persistent image storage. A complex trace can take time; there is no hard execution timeout on native tracing.
 
 ## Run the checks
 
