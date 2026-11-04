@@ -65,10 +65,20 @@ class VectorStudioTests(unittest.TestCase):
         with patch.object(launcher, 'make_server', return_value=server) as make_server, \
                 patch.object(launcher.threading, 'Timer') as timer:
             launcher.main()
-        make_server.assert_called_once_with('127.0.0.1', 0, app, threaded=True)
+        make_server.assert_called_once_with('127.0.0.1', launcher.PREFERRED_PORT, app, threaded=True)
         self.assertEqual(timer.call_args.kwargs['args'], ('http://127.0.0.1:54321',))
         timer.return_value.start.assert_called_once()
         timer.return_value.cancel.assert_called_once()
+        server.server_close.assert_called_once()
+
+    def test_launcher_falls_back_if_preferred_port_is_busy(self):
+        server = Mock(server_port=54322)
+        server.serve_forever.side_effect = KeyboardInterrupt
+        with patch.object(launcher, 'make_server', side_effect=[SystemExit(1), server]) as make_server, \
+                patch.object(launcher.threading, 'Timer'):
+            launcher.main()
+        self.assertEqual(make_server.call_count, 2)
+        self.assertEqual(make_server.call_args.args[:2], ('127.0.0.1', 0))
         server.server_close.assert_called_once()
 
 
