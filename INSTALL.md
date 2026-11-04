@@ -2,6 +2,14 @@
 
 [Back to README](README.md)
 
+## Testing the Cutting Lab branch
+
+Download this experimental version from [cricut-cutting-v2](https://github.com/CBDesignS/vector-studio/tree/cricut-cutting-v2), then choose **Code → Download ZIP**. Run `Install.cmd` from the extracted folder. It installs separately as **Vector Studio Cutting Lab**, leaving your original Vector Studio installation and shortcut in place.
+
+Use transparency on for normal cut files. In single-color mode, white spaces become real holes. In color mode, the selected background color is removed everywhere, including intentional artwork of that color. Inspect **Cut boundaries**, confirm SVG size in millimetres, then import into Design Space and verify dimensions and layers. Preview strokes and red detail marks are never included in the downloaded SVG. The small-detail guide is an estimate from the thresholded raster before tracing; it is not a guarantee of cutting performance.
+
+The original installation has been reported working by the user. This new branch has automated geometry tests, but still needs a full Windows install test and a physical Cricut test.
+
 ## Requirements
 
 Use 64-bit Windows 10 or Windows 11 and an internet connection for initial setup. Python 3.11 or 3.12 is required; setup checks for it and asks before installing Python 3.12 if missing. No Git, Node.js, Rust, paid API, or administrator account is needed for the normal per-user installation.
@@ -24,15 +32,15 @@ If installing Python manually, choose **64-bit Python 3.12**, include pip, and r
 6. Confirm the app setup and dependency download when prompted.
 7. Wait for the checks to pass and the **Installed successfully** message.
 
-Setup copies the app into `%LOCALAPPDATA%\VectorStudio`, creates a separate Python environment, installs Flask, Pillow, VTracer and their dependencies, runs app checks including actual SVG conversions, and creates a **Vector Studio** desktop shortcut. Nothing is installed without the setup prompts being accepted. You can delete the extracted download folder after successful installation.
+Setup copies the app into `%LOCALAPPDATA%\VectorStudioCuttingLab`, creates a separate Python environment, installs Flask, Pillow, VTracer and their dependencies, runs app checks including actual SVG conversions, and creates a **Vector Studio Cutting Lab** desktop shortcut. Nothing is installed without the setup prompts being accepted. You can delete the extracted download folder after successful installation.
 
 ## Run and stop
 
-Double-click **Vector Studio** on your desktop. A console window starts the server and opens your default browser. Keep the console open while using the app. Close it or press **Ctrl+C** to stop the server.
+Double-click **Vector Studio Cutting Lab** on your desktop. A console window starts the server and opens your default browser. Keep the console open while using the app. Close it or press **Ctrl+C** to stop the server.
 
 If the browser does not open automatically, copy the local address printed in the console into your browser. The launcher chooses a free local port, so the address may change on each launch. Each shortcut launch starts a separate instance; close extra console windows if needed.
 
-You can also run `%LOCALAPPDATA%\VectorStudio\Run.cmd` directly. The app listens only on this computer and works offline after dependencies are installed. It does not run at Windows sign-in or install a background service.
+You can also run `%LOCALAPPDATA%\VectorStudioCuttingLab\Run.cmd` directly. The app listens only on this computer and works offline after dependencies are installed. It does not run at Windows sign-in or install a background service.
 
 ## Check components without installing
 
@@ -46,15 +54,15 @@ This reports the compatible Python installation and whether the app dependencies
 
 ## Update or repair
 
-To repair missing dependencies, close the app and rerun `Install.cmd` in `%LOCALAPPDATA%\VectorStudio`.
+To repair missing dependencies, close the app and rerun `Install.cmd` in `%LOCALAPPDATA%\VectorStudioCuttingLab`.
 
 To update the app, download a fresh project ZIP from GitHub, extract it, close the running app, and run the new `Install.cmd`. After confirmation, setup replaces app source files in the installation folder. It checks existing dependencies and installs them if needed. This is a manual update process without automatic rollback.
 
 ## Uninstall
 
 1. Close the Vector Studio console window.
-2. Delete `%LOCALAPPDATA%\VectorStudio`.
-3. Delete the **Vector Studio** desktop shortcut.
+2. Delete `%LOCALAPPDATA%\VectorStudioCuttingLab`.
+3. Delete the **Vector Studio Cutting Lab** desktop shortcut.
 
 Python is left installed because other applications may use it. The app is not registered in Windows Add/Remove Programs.
 
@@ -73,4 +81,4 @@ This is a script-based installer, not a signed `.exe`. The batch file uses a pro
 
 ## Verification status
 
-Six app tests pass, including real color and black-and-white tracing and the desktop launcher test. PowerShell syntax and read-only component discovery have been checked. A complete first-time Windows installation, Python download, and desktop shortcut creation still need testing on a regular Windows installation.
+Ten app tests pass, including real color and black-and-white tracing and the desktop launcher test. PowerShell syntax and read-only component discovery have been checked. A complete first-time Windows installation, Python download, and desktop shortcut creation still need testing on a regular Windows installation.
