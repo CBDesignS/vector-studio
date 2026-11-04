@@ -65,7 +65,7 @@ try {
     Write-Host "`nVector Studio Cutting Lab - Experimental Windows Setup`n" -ForegroundColor Green
     if (-not [Environment]::Is64BitOperatingSystem) { throw 'This setup requires 64-bit Windows 10 or Windows 11.' }
     $sourceDirectory = Split-Path -Parent $PSScriptRoot
-    foreach ($required in @('app.py','launcher.py','Run.cmd','requirements.txt','templates\index.html','static\app.js','static\style.css','static\cutting.css','static\icons\app.ico')) {
+    foreach ($required in @('app.py','launcher.py','Run.cmd','requirements.txt','templates\index.html','static\app.js','static\style.css','static\cutting.css','static\icons\app.ico','static\theme.js','static\theme.css')) {
         if (-not (Test-Path -LiteralPath (Join-Path $sourceDirectory $required))) {
             throw "Missing $required. Extract the entire ZIP before running Install.cmd."
         }
@@ -108,7 +108,7 @@ try {
     # Explicit allowlist avoids copying uploads, caches, or the development environment.
     $files = @('app.py','launcher.py','Run.cmd','Install.cmd','README.md','INSTALL.md','requirements.txt',
                '.gitignore','windows\Install.ps1','templates\index.html',
-               'static\app.js','static\style.css','static\cutting.css','static\icons\app.ico',
+               'static\app.js','static\style.css','static\cutting.css','static\theme.js','static\theme.css','static\icons\app.ico',
                'static\icons\favicon.ico','static\icons\icon.svg',
                'static\icons\app-192.png','static\icons\app-512.png','tests\test_app.py')
     foreach ($relative in $files) {
