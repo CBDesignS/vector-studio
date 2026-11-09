@@ -4,11 +4,22 @@
 
 **Appearance:** choose **System**, **Light**, or **Dark** from the header. System is the default and follows your Windows/browser preference live. Each app remembers its own choice in a local preference cookie, including when its launch port changes. Image and SVG colors are unchanged; the preview uses a pale checkerboard to keep black cutting artwork visible.
 
-## Cutting Lab — experimental branch
+## Cutting Lab
 
-This is **cricut-cutting-v2**, an experimental version aimed at SVG artwork for cutting machines. The working `main` branch is unchanged. The Windows installer uses a separate `%LOCALAPPDATA%\VectorStudioCuttingLab` folder and **Vector Studio Cutting Lab** desktop shortcut, so you can test it alongside the original app.
+Cutting Lab is now the default version of Vector Studio on the **cricut-cutting-v2** branch. It makes SVG artwork for cutting machines. The older `main` branch remains available separately.
 
-Open [this branch](https://github.com/CBDesignS/vector-studio/tree/cricut-cutting-v2), choose **Code → Download ZIP**, extract the whole ZIP, and run **Install.cmd**. See [INSTALL.md](INSTALL.md).
+## Download and install
+
+Download the **whole project ZIP** from [the default branch](https://github.com/CBDesignS/vector-studio), then extract it. Keep the folders together; do not download just one installer file.
+
+| Computer | Double-click to install | Instructions |
+| --- | --- | --- |
+| Windows PC | `windows/Install.cmd` | [Windows guide](INSTALL.md) |
+| Apple Silicon Mac (M1 or newer) | `macos/Install.command` | [Mac guide](MAC_INSTALL.md) |
+
+The `windows` and `macos` folders keep platform-specific setup, run, and uninstall files separate. Shared app files stay in the project root. Moving the installer files this way does not require separate copies of the app.
+
+**Mac setup:** downloads a private Python 3.12 and the tracing packages without Homebrew or administrator rights, then creates desktop **Run** and **Uninstall** shortcuts. No terminal commands need to be typed. macOS may ask for permission to open the downloaded script or access Desktop; see the Mac guide. Intel Macs and iPads are not supported by this installer.
 
 ### What changed
 
@@ -46,14 +57,14 @@ A local Flask + VTracer image-to-SVG app. All frontend assets are local; there a
 On GitHub, click **Code → Download ZIP** to get all installer and app files together.
 
 1. Download the project ZIP and **extract the entire ZIP** into a folder.
-2. Double-click `Install.cmd`. Do not run it from inside the ZIP.
+2. Double-click `windows/Install.cmd`. Do not run it from inside the ZIP.
 3. Setup checks for 64-bit Python 3.11/3.12. If missing, it asks before installing Python 3.12 with Windows Package Manager. Review any installer or agreement prompts yourself. If Windows Package Manager is unavailable, setup explains how to install Python manually.
 4. Confirm the app setup and dependency download. Setup copies the app to `%LOCALAPPDATA%\VectorStudioCuttingLab`, creates its own Python environment, installs the packages, runs the checks, and creates a **Vector Studio Cutting Lab** desktop shortcut.
 5. Double-click the Cutting Lab shortcut. It starts the local app and opens your default browser, normally on port 5179. Keep the console window open; close it or press Ctrl+C to stop the server. Each launch starts a separate instance.
 
 No Git, Node.js, Rust, paid API, or administrator account is needed for the normal per-user installation. Internet access is required for initial downloads. The batch files use a process-only PowerShell execution policy option; they do not change your saved Windows policy. Organization policies may still prevent scripts or installations.
 
-**Updates and removal (package 2.0.0-preview.2):** close the app, extract a newer ZIP outside the installation folder, and run its `Install.cmd`. Setup detects an existing installation and offers **1: Update/repair**, **2: Clean reinstall**, or **3: Cancel**. Normal updates replace app files in the same `%LOCALAPPDATA%\VectorStudioCuttingLab` folder; they do not create nested version folders. Clean reinstall asks again before deleting that edition's entire folder. The original and Cutting Lab remain separate. See [update instructions](INSTALL.md#update-repair-or-clean-reinstall).
+**Updates and removal (package 2.1.0):** close the app, extract a newer ZIP outside the installation folder, and run its `windows/Install.cmd`. Setup detects an existing installation and offers **1: Update/repair**, **2: Clean reinstall**, or **3: Cancel**. Normal updates replace app files in the same `%LOCALAPPDATA%\VectorStudioCuttingLab` folder; they do not create nested version folders. Clean reinstall asks again before deleting that edition's entire folder. The original and Cutting Lab remain separate. See [update instructions](INSTALL.md#update-repair-or-clean-reinstall).
 
 For a read-only component check, open PowerShell in the extracted folder and run:
 
@@ -61,9 +72,9 @@ For a read-only component check, open PowerShell in the extracted folder and run
 powershell.exe -NoProfile -File .\windows\Install.ps1 -CheckOnly
 ```
 
-To uninstall, close the app and run `Uninstall.cmd` from this edition's installation folder or extracted ZIP, or choose its **Uninstall** entry in Windows Start after running the updated installer. Confirm the displayed folder before removal. The app folder, private environment, and matching shortcuts are removed; Python and the other edition are kept. Move personal files out of the app folder first. See [uninstall instructions](INSTALL.md#uninstall). This is a script-based installer, not an Add/Remove Programs package.
+To uninstall, close the app and run `windows/Uninstall.cmd` from this edition's installation folder or extracted ZIP, or choose its **Uninstall** entry in Windows Start after running the updated installer. Confirm the displayed folder before removal. The app folder, private environment, and matching shortcuts are removed; Python and the other edition are kept. Move personal files out of the app folder first. See [uninstall instructions](INSTALL.md#uninstall). This is a script-based installer, not an Add/Remove Programs package.
 
-The manual setup instructions below remain available for developers and macOS/Linux users.
+The manual setup instructions below remain available for developers and Linux users. Mac users can use the [double-click installer](MAC_INSTALL.md).
 
 ## 1. Install Python
 
