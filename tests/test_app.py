@@ -128,7 +128,7 @@ class VectorStudioTests(unittest.TestCase):
         server.serve_forever.side_effect = KeyboardInterrupt
         with patch.object(launcher, 'make_server', return_value=server) as make_server, \
                 patch.object(launcher.threading, 'Timer') as timer:
-            launcher.main()
+            launcher.run_server()
         make_server.assert_called_once_with('127.0.0.1', launcher.PREFERRED_PORT, app, threaded=True)
         self.assertEqual(timer.call_args.kwargs['args'], ('http://127.0.0.1:54321',))
         timer.return_value.start.assert_called_once()
@@ -140,7 +140,7 @@ class VectorStudioTests(unittest.TestCase):
         server.serve_forever.side_effect = KeyboardInterrupt
         with patch.object(launcher, 'make_server', side_effect=[SystemExit(1), server]) as make_server, \
                 patch.object(launcher.threading, 'Timer'):
-            launcher.main()
+            launcher.run_server()
         self.assertEqual(make_server.call_count, 2)
         self.assertEqual(make_server.call_args.args[:2], ('127.0.0.1', 0))
         server.server_close.assert_called_once()
