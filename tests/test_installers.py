@@ -3,6 +3,8 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+import sys
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('mac_manage', ROOT / 'macos/manage.py')
@@ -80,6 +82,18 @@ class InstallerTests(unittest.TestCase):
         setup = (ROOT / 'windows/Install.ps1').read_text()
         self.assertIn("Join-Path $destination 'windows\\Run.cmd'", setup)
         self.assertIn("Join-Path $destination 'windows\\Uninstall.cmd'", setup)
+
+    @unittest.skipUnless(sys.platform == 'darwin', 'Requires macOS file locking.')
+    def test_mac_launcher_refuses_exclusive_maintenance_lock(self):
+        import fcntl
+        import launcher
+        with (self.target / '.vector-studio-running.lock').open('ab') as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            with patch.object(launcher, '__file__', str(self.target / 'launcher.py')), \
+                    patch.object(launcher, 'run_server') as server:
+                with self.assertRaises(BlockingIOError):
+                    launcher.main()
+                server.assert_not_called()
 
 
 if __name__ == '__main__':
