@@ -4,7 +4,7 @@ title Uninstall Vector Studio Cutting Lab
 cd /d "%TEMP%"
 rem Read the entire block before PowerShell removes this installed batch file.
 (
-  powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0windows\Uninstall.ps1"
+  powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Uninstall.ps1"
   set "uninstallResult=!errorlevel!"
   echo.
   pause
