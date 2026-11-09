@@ -44,7 +44,7 @@ function Get-AppInstallState([string]$Target, [string]$AppId) {
         return 'Managed'
     }
     if ((Test-Path -LiteralPath (Join-Path $Target 'app.py')) -and
-        (Test-Path -LiteralPath (Join-Path $Target 'Run.cmd')) -and
+        ((Test-Path -LiteralPath (Join-Path $Target 'Run.cmd')) -or (Test-Path -LiteralPath (Join-Path $Target 'windows\Run.cmd'))) -and
         (Test-Path -LiteralPath (Join-Path $Target '.venv\pyvenv.cfg'))) { return 'Legacy' }
     if (@(Get-ChildItem -LiteralPath $Target -Force).Count -eq 0) { return 'Empty' }
     throw 'The target contains unrecognized files and no valid installation record. No files will be removed.'
