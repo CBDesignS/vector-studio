@@ -2,6 +2,7 @@
 import threading
 import webbrowser
 from pathlib import Path
+import sys
 
 from werkzeug.serving import make_server
 from app import app
@@ -34,8 +35,14 @@ def run_server():
 
 
 def main():
-    # Keep this handle open so Windows setup/uninstall can detect a live app.
-    with Path(__file__).with_name('.vector-studio-running.lock').open('ab'):
+    # Shared Mac locks allow multiple launchers; setup holds an exclusive lock.
+    with Path(__file__).with_name('.vector-studio-running.lock').open('ab') as lock:
+        if sys.platform == 'darwin':
+            import fcntl
+            fcntl.flock(lock, fcntl.LOCK_SH | fcntl.LOCK_NB)
+            maintenance = Path.home() / 'Library/Application Support/.VectorStudioCuttingLab-maintenance'
+            if maintenance.exists():
+                raise SystemExit('Setup/removal is running. Wait for it to finish before opening the app.')
         run_server()
 
 
