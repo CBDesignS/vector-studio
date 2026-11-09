@@ -31,6 +31,6 @@ try {
     Write-Host "`n$appName has been removed." -ForegroundColor Green
 } catch {
     Write-Host "`nUninstall stopped: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host 'If Windows reported locked files, close the app and rerun Uninstall.cmd from an extracted ZIP.'
+    Write-Host 'If Windows reported locked files, close the app and rerun windows\Uninstall.cmd from an extracted ZIP.'
     exit 1
 }
