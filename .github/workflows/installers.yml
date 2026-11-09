@@ -1,0 +1,63 @@
+name: Installer checks
+on:
+  push:
+    branches: [cricut-cutting-v2]
+  pull_request:
+    branches: [cricut-cutting-v2]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mac:
+    permissions:
+      contents: write
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check shell syntax and executable bits
+        run: |
+          test "$(uname -m)" = arm64
+          for file in macos/*.command macos/*.sh; do
+            bash -n "$file"
+            chmod +x "$file"
+          done
+      - name: Install, trace, repair, and test safeguards
+        run: |
+          python macos/ci_smoke.py
+          python -m pip install --only-binary=:all: -r requirements.txt
+          python -m unittest discover -s tests -v
+      - name: Preserve Finder executable permissions in GitHub ZIP downloads
+        if: github.event_name == 'push' && github.ref == 'refs/heads/cricut-cutting-v2'
+        run: |
+          git update-index --chmod=+x macos/*.command macos/*.sh
+          if ! git diff --cached --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'Mark Mac double-click installers executable'
+            git push origin HEAD:cricut-cutting-v2
+          fi
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Parse Windows setup scripts
+        shell: powershell
+        run: |
+          Get-ChildItem windows -Filter *.ps1 | ForEach-Object {
+            $tokens = $null; $parseErrors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$parseErrors) | Out-Null
+            if ($parseErrors.Count) { throw ($parseErrors | Out-String) }
+          }
+      - name: Test tracing and installer file layout
+        run: |
+          python -m pip install --only-binary=:all: -r requirements.txt
+          python -m unittest discover -s tests -v
+
