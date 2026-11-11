@@ -12,14 +12,26 @@ MAINTENANCE=''
 
 message() {
   /usr/bin/osascript - "$1" <<'APPLESCRIPT'
+use framework "AppKit"
+use scripting additions
+
 on run argv
+  set dialogApp to current application's NSApplication's sharedApplication()
+  dialogApp's setActivationPolicy:(current application's NSApplicationActivationPolicyAccessory)
+  dialogApp's activateIgnoringOtherApps:true
   display dialog (item 1 of argv) with title "Vector Studio Cutting Lab" buttons {"OK"} default button "OK"
 end run
 APPLESCRIPT
 }
 confirm() {
   /usr/bin/osascript - "$1" "$2" <<'APPLESCRIPT'
+use framework "AppKit"
+use scripting additions
+
 on run argv
+  set dialogApp to current application's NSApplication's sharedApplication()
+  dialogApp's setActivationPolicy:(current application's NSApplicationActivationPolicyAccessory)
+  dialogApp's activateIgnoringOtherApps:true
   display dialog (item 1 of argv) with title "Vector Studio Cutting Lab" buttons {"Cancel", (item 2 of argv)} default button (item 2 of argv) cancel button "Cancel"
 end run
 APPLESCRIPT
@@ -105,7 +117,7 @@ WORK="$(/usr/bin/mktemp -d "${TMPDIR:-/tmp/}vector-studio.XXXXXX")"
 UV_VERSION='0.13.7'
 UV_SHA256='81b811b57e4624df7ed3aac148e0359100d9962f3d9dce00aec533dc2e086731'
 echo 'Downloading and verifying the Python setup tool...'
-/usr/bin/curl --fail --location --retry 3 --proto '=https' --proto-redir '=https' --tlsv1.2 \
+/usr/bin/curl --fail --location --retry 3 --connect-timeout 15 --max-time 180 --retry-max-time 240 --proto '=https' --proto-redir '=https' --tlsv1.2 \
   "https://github.com/astral-sh/uv/releases/download/$UV_VERSION/uv-aarch64-apple-darwin.tar.gz" -o "$WORK/uv.tar.gz"
 printf '%s  %s\n' "$UV_SHA256" "$WORK/uv.tar.gz" | /usr/bin/shasum -a 256 -c -
 /usr/bin/tar -xzf "$WORK/uv.tar.gz" -C "$WORK"
@@ -114,8 +126,10 @@ export UV_PYTHON_INSTALL_DIR="$TARGET/runtime"
 export UV_PYTHON_INSTALL_BIN=0
 export UV_NO_CONFIG=1
 export UV_NO_CACHE=1
+export UV_HTTP_TIMEOUT=60
 export PYTHONNOUSERSITE=1
 unset PYTHONHOME PYTHONPATH || true
+echo 'Preparing private Python 3.12...'
 "$UV" python install 3.12 --no-bin --no-config --no-progress
 PYTHON="$("$UV" python find 3.12 --managed-python --no-python-downloads --no-config)"
 "$PYTHON" "$HERE/manage.py" "$SOURCE" "$TARGET" "$UV"
