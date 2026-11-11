@@ -17,7 +17,7 @@ No Homebrew, Git, Rust, administrator password, or separately installed Python i
 5. Leave the Terminal window open while it downloads components and checks the app. Wait for **Installed successfully**.
 6. On your Desktop, double-click **Vector Studio Cutting Lab.command**. Your browser opens the app.
 
-Terminal opens automatically to show progress; you do not type commands into it. If macOS asks whether Terminal may access Desktop or Downloads, allow access to those folders to install from Downloads and create the desktop shortcuts. If you decline, setup may stop; rerun after granting the relevant folder access.
+Setup brings its confirmation and completion dialogs forward. If a macOS permission prompt appears during setup, answer it before continuing. Terminal opens automatically to show progress; you do not type commands into it. If macOS asks whether Terminal may access Desktop or Downloads, allow access to those folders to install from Downloads and create the desktop shortcuts. If you decline, setup may stop; rerun after granting the relevant folder access.
 
 The installer folder must remain alongside `app.py`, `requirements.txt`, `static`, `templates`, and `tests`. Downloading just `Install.command` will not work.
 
@@ -52,7 +52,7 @@ This permanently removes `~/Library/Application Support/VectorStudioCuttingLab`,
 | Item | Location |
 | --- | --- |
 | App, private environment, Python runtime | `~/Library/Application Support/VectorStudioCuttingLab` |
-| Start and uninstall shortcuts | Desktop, as `.command` files |
+| Start and uninstall shortcuts | Desktop, as `.command` files with the Cutting Lab icon |
 | Installer source | `macos/` in the extracted project |
 
 Uninstall refuses unrecognised installation folders or redirected installation paths. It manages only the standard folder in the current account. It never removes a shared Python installation.
