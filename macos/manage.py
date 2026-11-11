@@ -8,7 +8,7 @@ import sys
 
 APP_FOLDER = 'VectorStudioCuttingLab'
 MARKER = 'vector-studio-cutting-lab:macos:1'
-VERSION = '2.1.0'
+VERSION = '2.1.1'
 FILES = (
     'app.py', 'launcher.py', 'requirements.txt', 'README.md', 'INSTALL.md',
     'MAC_INSTALL.md', '.gitignore', 'templates/index.html', 'static/app.js',
@@ -60,7 +60,27 @@ def desktop_launcher(action):
             f'{APP_FOLDER}/macos/Setup.sh" {action}\n')
 
 
-def create_shortcuts(home):
+def set_shortcut_icon(path, icon):
+    # AppKit sets Finder's custom icon without asking Finder to run commands.
+    script = """
+use framework "AppKit"
+on run argv
+    set artwork to current application's NSImage's alloc()'s initWithContentsOfFile:(item 1 of argv)
+    if artwork is missing value then error "Could not read the icon artwork."
+    set workspace to current application's NSWorkspace's sharedWorkspace()
+    if not (workspace's setIcon:artwork forFile:(item 2 of argv) options:0) then error "Could not set the Finder icon."
+end run
+"""
+    try:
+        subprocess.run(['/usr/bin/osascript', '-', str(icon), str(path)],
+                       input=script, text=True, check=True, timeout=15,
+                       capture_output=True)
+    except (OSError, subprocess.SubprocessError) as exc:
+        print(f'Could not apply the icon to {path.name}: {exc}', file=sys.stderr)
+
+
+
+def create_shortcuts(home, icon=None):
     desktop = home / 'Desktop'
     if not desktop.is_dir() or desktop.is_symlink():
         raise ValueError('Desktop folder is unavailable. Allow Desktop access and rerun setup.')
@@ -75,6 +95,8 @@ def create_shortcuts(home):
         path = desktop / name
         path.write_text(desktop_launcher(action))
         path.chmod(0o755)
+        if icon is not None:
+            set_shortcut_icon(path, icon)
 
 
 def install(source, target, uv, home=None):
@@ -98,7 +120,7 @@ def install(source, target, uv, home=None):
         subprocess.run([str(uv), 'pip', 'check', '--python', str(python), '--no-config'], check=True)
         subprocess.run([str(python), '-m', 'unittest', 'discover', '-s', 'tests', '-v'],
                        cwd=target, check=True)
-        create_shortcuts(home)
+        create_shortcuts(home, target / 'static/icons/app-512.png')
         (target / '.vector-studio-version.json').write_text(json.dumps(
             {'app_id': 'cutting-lab', 'version': VERSION, 'platform': 'macos'}, indent=2))
         print(f'Installed Vector Studio Cutting Lab {VERSION} in {target}', flush=True)
