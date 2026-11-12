@@ -73,6 +73,7 @@ async function convert() {
   $('convert').disabled = true;
   const form = new FormData();
   form.append('image', selectedFile);
+  form.append('stencil_guide', stencilGuide ? '1' : '0');
   controls.forEach(id => form.append(id, $(id).type === 'checkbox' ? ($(id).checked ? '1' : '0') : $(id).value));
   try {
     const response = await fetch('/api/vectorize', {method: 'POST', body: form});
@@ -143,14 +144,75 @@ $('dropzone').addEventListener('drop', event => {
 });
 window.addEventListener('dragover', event => event.preventDefault());
 window.addEventListener('drop', event => event.preventDefault());
-controls.forEach(id => $(id).addEventListener('input', queue));
-$('convert').addEventListener('click', convert);
-$('reset').addEventListener('click', () => {
-  Object.entries({colors: 6, smoothing: 60, speckle: 0, mode: 'binary', threshold:160,
-    background:'#ffffff', tolerance:20, fitting:'spline', quality:'1600', upscale:'1', width_mm:100, minimum_mm:0.5}).forEach(([id, value]) => $(id).value = value);
-  $('transparent').checked = true; $('trim').checked = true; $('invert').checked = false;
+const defaults = {colors: 6, smoothing: 60, speckle: 0, mode: 'binary', threshold: 160,
+  background: '#ffffff', tolerance: 20, fitting: 'spline', quality: '1600', upscale: '1',
+  width_mm: 100, minimum_mm: 0.5, transparent: true, trim: true, invert: false};
+const profiles = {
+  standard: {},
+  logo: {smoothing: 35, quality: '3200'},
+  stencil: {speckle: 4, minimum_mm: 1},
+  shirt: {width_mm: 230, minimum_mm: 1},
+  cap: {width_mm: 85, minimum_mm: 0.8},
+  cup: {width_mm: 65, minimum_mm: 0.8},
+};
+const profileNotes = {
+  logo: 'Keeps fine details and sharper corners.',
+  stencil: 'Orange marks in the detail guide flag enclosed areas that may need bridges.',
+  shirt: 'Starts at 230 mm wide. Check against your garment.',
+  cap: 'Starts at 85 mm wide. Check against the available panel.',
+  cup: 'Starts at 65 mm wide. Check against the usable area of your cup.',
+};
+const profileKey = 'vector-studio-cutting-profile-v1';
+let stencilGuide = false;
+let savedProfile;
+try {
+  const stored = JSON.parse(localStorage.getItem(profileKey));
+  if (stored && stored.settings && controls.every(id => Object.hasOwn(stored.settings, id))) {
+    savedProfile = stored;
+  }
+} catch {}
+if (savedProfile) $('profile').add(new Option('My profile', 'saved'));
+
+function applyProfile(name) {
+  const settings = name === 'saved' ? savedProfile.settings : profiles[name];
+  if (!settings) return;
+  controls.forEach(id => {
+    const value = settings[id] ?? defaults[id];
+    if ($(id).type === 'checkbox') $(id).checked = value === true;
+    else $(id).value = value;
+  });
+  stencilGuide = name === 'stencil' || (name === 'saved' && savedProfile.stencilGuide === true);
+  $('profile').value = name;
+  $('profile-note').textContent = profileNotes[name] || '';
+  $('preview-mode').value = stencilGuide ? 'guide' : 'filled';
   queue();
+}
+controls.forEach(id => $(id).addEventListener('input', () => {
+  $('profile').value = 'custom';
+  $('profile-note').textContent = stencilGuide ? profileNotes.stencil : '';
+  queue();
+}));
+$('profile').addEventListener('change', event => applyProfile(event.target.value));
+$('save-profile').addEventListener('click', () => {
+  if (controls.some(id => !$(id).checkValidity())) {
+    $('profile-note').textContent = 'Check the settings before saving.';
+    return;
+  }
+  const settings = Object.fromEntries(controls.map(id =>
+    [id, $(id).type === 'checkbox' ? $(id).checked : $(id).value]));
+  try {
+    const profile = {settings, stencilGuide};
+    localStorage.setItem(profileKey, JSON.stringify(profile));
+    if (!savedProfile) $('profile').add(new Option('My profile', 'saved'));
+    savedProfile = profile;
+    $('profile').value = 'saved';
+    $('profile-note').textContent = 'My profile saved in this browser.';
+  } catch {
+    $('profile-note').textContent = 'This browser could not save the profile.';
+  }
 });
+$('convert').addEventListener('click', convert);
+$('reset').addEventListener('click', () => applyProfile('standard'));
 $('preview-mode').addEventListener('change', showPreview);
 $('zoom').addEventListener('change', () => {
   document.querySelectorAll('.canvas').forEach(canvas => {
