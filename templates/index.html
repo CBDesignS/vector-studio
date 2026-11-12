@@ -22,6 +22,18 @@
         <label id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Choose or drop an image"><span class="upload-icon">↥</span><strong>Drop an image here</strong><span>or click to browse</span><small>PNG, JPG, WebP, BMP · up to 12 MB</small><input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/bmp" hidden></label>
         <div id="filename" class="filename">No image selected</div>
         <div class="section-title settings-title"><span>02</span> Make it yours <button id="reset" class="text-button" type="button">Reset</button></div>
+        <label class="field-label" for="profile">Cut profile</label>
+        <select id="profile">
+          <option value="standard">Standard</option>
+          <option value="logo">Logo</option>
+          <option value="stencil">Stencil</option>
+          <option value="shirt">T-shirt</option>
+          <option value="cap">Cap</option>
+          <option value="cup">Cup</option>
+          <option value="custom" disabled>Custom settings</option>
+        </select>
+        <button id="save-profile" class="text-button" type="button">Save as my profile</button>
+        <p id="profile-note" aria-live="polite"></p>
         <label class="field-label" for="mode">Trace mode</label><select id="mode"><option value="binary">Single-color cut (recommended)</option><option value="color">Color layers</option></select>
         <label class="check"><input id="transparent" type="checkbox" checked> Transparent background</label>
         <label class="check"><input id="trim" type="checkbox" checked> Trim empty margins</label>
