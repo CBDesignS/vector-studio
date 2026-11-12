@@ -8,6 +8,14 @@
 
 Cutting Lab is now the default version of Vector Studio on the **cricut-cutting-v2** branch. It makes SVG artwork for cutting machines. The older `main` branch remains available separately.
 
+## Cutting profiles trial
+
+Choose **Logo**, **Stencil**, **T-shirt**, **Cap** or **Cup** under **Cut profile**. Each profile sets editable starting values. T-shirt starts at 230 mm, Cap at 85 mm and Cup at 65 mm. Measure the actual area before cutting. **Save as my profile** stores one reusable set of settings in this browser at this app address.
+
+Stencil opens the small-detail guide. Orange indicates enclosed areas in the traced source mask that may need bridges. Check the cut boundaries before cutting. The orange marks are preview annotations and the exported SVG contains the artwork only.
+
+To try this branch alongside an existing installation, extract the branch ZIP into a separate folder and follow the manual Python setup below. Start it from that folder with the manual launch command.
+
 ## Download and install
 
 Download the **whole project ZIP** from [the default branch](https://github.com/CBDesignS/vector-studio), then extract it. Keep the folders together; do not download just one installer file.
