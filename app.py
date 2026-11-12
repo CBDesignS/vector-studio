@@ -11,7 +11,7 @@ from pathlib import Path
 from threading import Lock
 
 from flask import Flask, jsonify, render_template, request, send_from_directory
-from PIL import Image, ImageOps, ImageChops, ImageFilter, UnidentifiedImageError
+from PIL import ImageDraw, Image, ImageOps, ImageChops, ImageFilter, UnidentifiedImageError
 import vtracer
 
 app = Flask(__name__)
@@ -33,7 +33,7 @@ def flag(name, default='0'):
     return choice(name, default, ('0', '1')) == '1'
 
 
-def detail_guide(mask, width_mm, minimum_mm):
+def detail_guide(mask, width_mm, minimum_mm, stencil=False):
     """Raster estimate only: highlight thin foreground and narrow internal gaps."""
     mask = mask.copy()
     mask.thumbnail((768, 768), Image.Resampling.NEAREST)
@@ -52,6 +52,12 @@ def detail_guide(mask, width_mm, minimum_mm):
     guide.paste((35, 60, 46, 255), mask=mask)
     guide.paste((225, 65, 54, 255), mask=marks)
     output = io.BytesIO()
+    if stencil:
+        # A white area cut off from the outside may become a loose stencil centre.
+        padded = ImageOps.expand(mask, border=1, fill=0)
+        ImageDraw.floodfill(padded, (0, 0), 128)
+        enclosed = padded.crop((1, 1, mask.width + 1, mask.height + 1))
+        guide.paste((255, 160, 35, 255), mask=enclosed.point(lambda x: 255 if x == 0 else 0))
     guide.save(output, format='PNG')
     return ('data:image/png;base64,' + base64.b64encode(output.getvalue()).decode(),
             marks.getbbox() is not None, requested > kernel)
@@ -208,7 +214,10 @@ def vectorize():
             svg, image.size, width_mm, transparent and mode == 'color', background)
         guide = None
         if mode == 'binary':
-            guide, thin, limited = detail_guide(mask, width_mm, minimum_mm)
+            stencil = request.form.get('stencil_guide') == '1'
+            guide, thin, limited = detail_guide(mask, width_mm, minimum_mm, stencil)
+            if stencil:
+                notices.append('Orange areas estimate enclosed stencil centres. Inspect them for bridges before cutting.')
             if thin:
                 notices.append('Red detail-guide marks estimate thin features or narrow gaps; inspect before cutting.')
             if limited:
